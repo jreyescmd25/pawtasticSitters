@@ -1,0 +1,366 @@
+@font-face {
+    font-family: 'Bungee';
+    src: url(./assets/fonts/Bungee-Regular.ttf) format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lilita One';
+    src: url('./assets/fonts/LilitaOne-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+.title{
+    font-family: 'Bungee', sans-serif;
+    font-size: 50px;
+    text-shadow: 0px 5px black;
+    -webkit-text-stroke: 0.5px black;
+    text-align: center;
+    color: white;
+}
+
+body {
+    background-color: rgb(34, 37, 40);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.paw-bg {
+    position: fixed;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 100 100'%3E%3Ccircle cx='30' cy='20' r='8' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='55' cy='15' r='7' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='75' cy='28' r='7' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='18' cy='38' r='6' fill='rgba(255,255,255,0.06)'/%3E%3Cellipse cx='48' cy='58' rx='22' ry='18' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E");
+    animation: pawScroll 8s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes pawScroll {
+    0% { transform: rotate(-25deg) translate(0, 0); }
+    100% { transform: rotate(-25deg) translate(-80px, 80px); }
+}
+button{
+    font-family: 'Bungee', sans-serif;
+    background-color:rgb(53, 53, 102);
+    padding: 15px 35px;
+    border-radius: 15px;
+    font-size: 25px;
+    color: white;
+    text-shadow: 0px 5px black;
+}
+
+button:hover{
+    background-color: #5f6069
+}
+
+
+nav{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 30px;
+}
+
+.hero{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Lilita One', sans-serif;
+    text-shadow: 0px 5px black;
+    -webkit-text-stroke: 0.25px black;
+}
+
+input {
+    padding: 20px 25px;
+    border-radius: 15px;
+    border: none;
+    font-family: 'Lilita One', sans-serif;
+    font-size: 18px;
+    outline: none;
+    background-color: rgb(53, 53, 102);
+    color: white;
+    width: 400px
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#map {
+    width: 100%;
+    height: 500px;
+    border-radius: 15px;
+    margin-top: 40px;
+    margin-left: 50;
+}
+
+.map-section {
+    padding: 0 40px;
+}
+
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+
+    input {
+        width: 50%;
+    }
+
+    #map {
+        height: 300px;
+    }
+
+    .map-section {
+        padding: 0 15px;
+    }
+
+    button{
+        font-size: 15px;
+    }
+    .hero {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    .search-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 10px;
+    }
+}
+
+#errorMsg {
+    color: red;
+    font-family: 'Lilita One', sans-serif;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.form-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+}
+
+.form-box {
+    background-color: rgb(53, 53, 102);
+    padding: 50px 40px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 400px;
+    text-align: center;
+}
+
+.form-box h2 {
+    color: white;
+    font-family: 'Bungee', sans-serif;
+    font-size: 30px;
+    text-shadow: 0px 5px black;
+}
+
+.form-box input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.switch-page {
+    color: rgba(255,255,255,0.6);
+    font-family: 'Lilita One', sans-serif;
+    font-size: 14px;
+}
+
+.switch-page span {
+    color: white;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.featured-sitters {
+    padding: 40px;
+    text-align: center;
+}
+
+.section-title {
+    font-family: 'Bungee', sans-serif;
+    color: white;
+    font-size: 35px;
+    text-shadow: 0px 5px black;
+    margin-bottom: 30px;
+}
+
+.sitter-grid {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.sitter-card {
+    background-color: rgb(53, 53, 102);
+    border-radius: 20px;
+    padding: 30px 25px;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.sitter-avatar {
+    font-size: 50px;
+}
+
+.sitter-card h3 {
+    font-family: 'Bungee', sans-serif;
+    color: white;
+    font-size: 18px;
+    text-shadow: 0px 3px black;
+}
+
+.sitter-location {
+    font-family: 'Lilita One', sans-serif;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+}
+
+.sitter-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tag {
+    background-color: rgba(255,255,255,0.15);
+    color: white;
+    font-family: 'Lilita One', sans-serif;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.sitter-rate {
+    font-family: 'Bungee', sans-serif;
+    color: white;
+    font-size: 20px;
+    text-shadow: 0px 3px black;
+}
+
+.sitter-card button {
+    font-size: 16px;
+    padding: 10px 25px;
+    margin-top: 5px;
+}
+
+#messageModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-box {
+    background: rgb(53, 53, 102);
+    border-radius: 20px;
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.2);
+}
+
+.modal-header h3 {
+    font-family: 'Bungee', sans-serif;
+    color: white;
+    font-size: 18px;
+    text-shadow: 0px 3px black;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.msg {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-family: 'Lilita One', sans-serif;
+    font-size: 14px;
+    color: white;
+}
+
+.msg.received {
+    background: rgba(255,255,255,0.15);
+    align-self: flex-start;
+}
+
+.msg.sent {
+    background: rgba(255,255,255,0.3);
+    align-self: flex-end;
+}
+
+.chat-input {
+    display: flex;
+    padding: 15px;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+}
+
+.chat-input input {
+    flex: 1;
+    width: auto;
+    padding: 10px 15px;
+    font-size: 14px;
+}
+
+.chat-input button {
+    font-size: 16px;
+    padding: 10px 20px;
+}

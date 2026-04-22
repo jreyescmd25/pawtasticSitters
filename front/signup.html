@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Paw-tastic Sitters</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="paw-bg"></div>
+    
+    <nav>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-box">
+            <h2>Create Account</h2>
+
+            <!-- STEP 1: Choose role -->
+            <div id="roleSelection">
+                <p class="switch-page">I am a...</p>
+                <div style="display:flex; gap:15px; justify-content:center;">
+                    <button onclick="selectRole('owner')">🐾 Pet Owner</button>
+                    <button onclick="selectRole('sitter')">🐶 Pet Sitter</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Basic info (both roles) -->
+            <div id="basicInfo" style="display:none; flex-direction:column; gap:15px;">
+                <input type="text" placeholder="Full Name" id="signupName">
+                <input type="text" placeholder="Email" id="signupEmail">
+                <input type="password" placeholder="Password" id="signupPassword">
+                <input type="password" placeholder="Confirm Password" id="signupConfirm">
+            </div>
+
+            <!-- STEP 3: Sitter details (sitter only) -->
+            <div id="sitterDetails" style="display:none; flex-direction:column; gap:15px;">
+                <input type="text" placeholder="Your Location (e.g. Bronx, NY)" id="sitterLocation">
+                
+                <p class="switch-page">Specialty (select all that apply)</p>
+                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button class="tag-btn" onclick="toggleTag(this, 'dog')">🐕 Dog</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'cat')">🐈 Cat</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'bird')">🐦 Bird</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'other')">🐾 Other</button>
+                </div>
+
+                <input type="number" placeholder="Hourly Rate ($/hr)" id="hourlyRate">
+            </div>
+
+            <!-- Submit button -->
+            <button id="submitBtn" style="display:none;" onclick="handleSignup()">Create Account</button>
+
+            <p class="switch-page">Already have an account? <span onclick="location.href='login.html'">Login</span></p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Paw-tastic Sitters</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="paw-bg"></div>
+
+    <nav>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-box">
+            <h2>Welcome Back!</h2>
+            <input type="text" placeholder="Email" id="loginEmail">
+            <input type="password" placeholder="Password" id="loginPassword">
+            <button onclick="handleLogin()">Login</button>
+            <p class="switch-page">Don't have an account? <span onclick="location.href='signup.html'">Sign Up</span></p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
