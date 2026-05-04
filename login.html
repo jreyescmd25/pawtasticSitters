@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Paw-tastic Sitters</title>
-    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,15 +26,16 @@
         </div>
     </section>
 
-    <script src="script.js"></script>
-
     <div id="loginError" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
-    <div class="form-box" style="width:350px; gap:15px;">
-        <h2>Invalid Credentials</h2>
-        <p class="switch-page" style="color:white;">No account found with that email and password. Please try again or create an account.</p>
-        <button onclick="document.getElementById('loginError').style.display='none'">Try Again</button>
-        <button onclick="location.href='signup.html'" style="background:rgba(255,255,255,0.1);">Create Account</button>
+        <div class="form-box" style="width:350px; gap:15px;">
+            <h2>Invalid Credentials</h2>
+            <p class="switch-page" style="color:white;">No account found with that email and password. Please try again or create an account.</p>
+            <button onclick="document.getElementById('loginError').style.display='none'">Try Again</button>
+            <button onclick="location.href='signup.html'" style="background:rgba(255,255,255,0.1);">Create Account</button>
+        </div>
     </div>
-</div>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

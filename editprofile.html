@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
-    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,7 +21,6 @@
         <div class="form-box" style="width:500px;">
             <h2>Edit Profile</h2>
 
-            <!-- Displays current avatar - updates on selection -->
             <div id="profileAvatar" style="font-size:80px; cursor:pointer;"></div>
             
             <p class="switch-page">Change Avatar</p>
@@ -35,7 +33,6 @@
                 <button class="tag-btn" onclick="selectAvatar(this, '🐦')">🐦</button>
             </div>
 
-            <!-- backend: Pre-filled from localStorage - replace with GET /api/user/profile -->
             <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
                 <input type="text" placeholder="First Name" id="editFirstName" oninput="validateLetters(this, 'firstNameError')">
                 <p class="field-error" id="firstNameError"></p>
@@ -47,8 +44,6 @@
                 <p class="field-error" id="emailError"></p>
             </div>
 
-            <!-- Shown only if user role is sitter -->
-            <!-- backend: saveProfile() sends to PATCH /api/user/profile -->
             <div id="sitterEditDetails" style="display:none; flex-direction:column; gap:8px; width:100%;">
                 <input type="text" placeholder="Zip Code" id="editLocation" oninput="validateZip(this)" maxlength="5">
                 <p class="field-error" id="zipError"></p>
@@ -69,11 +64,8 @@
 
     <script src="script.js"></script>
     <script>
-        if (!localStorage.getItem("loggedIn")) {
-            location.href = "login.html";
-        }
+        if (!localStorage.getItem("loggedIn")) location.href = "login.html";
 
-        // backend: Replace localStorage reads with GET /api/user/profile
         let currentAvatar = localStorage.getItem("userAvatar") || "🐾";
         document.getElementById("profileAvatar").textContent = currentAvatar;
         document.getElementById("editFirstName").value = localStorage.getItem("userFirstName") || "";
@@ -106,8 +98,7 @@
             btn.style.backgroundColor = "#7b7bd4";
         }
 
-        // backend: Replace localStorage writes with PATCH /api/user/profile
-        function saveProfile() {
+        async function saveProfile() {
             const firstName = document.getElementById("editFirstName").value;
             const lastName = document.getElementById("editLastName").value;
             const username = document.getElementById("editUsername").value;
@@ -122,11 +113,13 @@
                 return;
             }
 
-            localStorage.setItem("userFirstName", firstName);
-            localStorage.setItem("userLastName", lastName);
-            localStorage.setItem("userUsername", username);
-            localStorage.setItem("userEmail", email);
-            localStorage.setItem("userAvatar", currentAvatar);
+            const db = window.supabase.createClient(
+                "https://nkerqwvpxcalmcrycddz.supabase.co",
+                "sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo"
+            );
+
+            const fullName = firstName + " " + lastName;
+            const userEmail = localStorage.getItem("userEmail");
 
             if (role === "sitter") {
                 const loc = document.getElementById("editLocation").value;
@@ -135,10 +128,38 @@
                     alert("Please fill in all sitter details!");
                     return;
                 }
+
+                const { error } = await db.from("sitters")
+                    .update({
+                        full_name: fullName,
+                        email: email,
+                        location: loc,
+                        hourly_rate: parseFloat(rate),
+                        specialties: selectedTags
+                    })
+                    .eq("email", userEmail);
+
+                if (error) { alert("Update error: " + error.message); return; }
+
                 localStorage.setItem("userLocation", loc);
                 localStorage.setItem("userRate", rate);
                 localStorage.setItem("userTags", selectedTags.join(", "));
+            } else {
+                const { error } = await db.from("owners")
+                    .update({
+                        full_name: fullName,
+                        email: email
+                    })
+                    .eq("email", userEmail);
+
+                if (error) { alert("Update error: " + error.message); return; }
             }
+
+            localStorage.setItem("userFirstName", firstName);
+            localStorage.setItem("userLastName", lastName);
+            localStorage.setItem("userUsername", username);
+            localStorage.setItem("userEmail", email);
+            localStorage.setItem("userAvatar", currentAvatar);
 
             alert("Profile updated!");
             location.href = "profile.html";
