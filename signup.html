@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Paw-tastic Sitters</title>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -53,7 +54,7 @@
             </div>
 
             <!-- STEP 3: Sitter only - shown when role is sitter -->
-            <!-- BACKEND: location, rate, tags sent to /api/register as sitter profile data -->
+            <!-- backend: location, rate, tags sent to /api/register as sitter profile data -->
             <div id="sitterDetails" style="display:none; flex-direction:column; gap:8px;">
                 <input type="text" placeholder="Your Zip Code" id="sitterLocation" oninput="validateZip(this)" maxlength="5">
                 <p class="field-error" id="zipError"></p>
@@ -71,12 +72,12 @@
             </div>
 
             <!-- Shown after role is selected -->
-            <!-- BACKEND: handleSignup() sends all data to /api/register -->
+            <!-- backend: handleSignup() sends all data to /api/register -->
             <button id="submitBtn" style="display:none;" onclick="handleSignup()">Create Account</button>
             <p class="switch-page">Already have an account? <span onclick="location.href='login.html'">Login</span></p>
         </div>
     </section>
-
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

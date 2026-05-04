@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Sitters</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -96,7 +97,7 @@
             const grid = document.getElementById("searchResults");
             if (!grid) return;
 
-            const { data: sitters, error } = await database.from("sitters").select("*");
+            const { data: sitters, error } = await getDB().from("sitters").select("*");
             if (error) { console.log(error.message); return; }
 
             grid.innerHTML = '';

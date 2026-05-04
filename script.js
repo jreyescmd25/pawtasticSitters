@@ -106,7 +106,7 @@ function toggleTag(btn, tag) {
 }
 
 // backend: Replace localStorage with POST /api/register - expects { firstName, lastName, email, password, username, role, avatar, location, rate, tags }
-function handleSignup() {
+async function handleSignup() {
     const firstName = document.getElementById("signupFirstName").value;
     const lastName = document.getElementById("signupLastName").value;
     const email = document.getElementById("signupEmail").value;
@@ -139,6 +139,26 @@ function handleSignup() {
         alert("Please enter a valid username!");
         return;
     }
+    // Check if username already exists in both tables
+    const { data: existingOwner } = await getDB()
+        .from("owners")
+        .select("email")
+        .eq("email", email)
+        .single();
+
+    const { data: existingSitter } = await getDB()
+        .from("sitters")
+        .select("email")
+        .eq("email", email)
+        .single();
+
+    if (existingOwner || existingSitter) {
+        alert("An account with this email already exists!");
+        return;
+    }   
+
+    const fullName = firstName + " " + lastName;
+
     if (selectedRole === 'sitter') {
         const loc = document.getElementById("sitterLocation").value;
         const rate = document.getElementById("hourlyRate").value;
@@ -146,10 +166,44 @@ function handleSignup() {
             alert("Please fill in all sitter details!");
             return;
         }
+
+        // Insert into Supabase sitters table
+        const { error } = await getDB()
+            .from("sitters")
+            .insert([{
+                full_name: fullName,
+                email: email,
+                // password: password,
+                location: loc,
+                specialties: selectedTags,
+                hourly_rate: parseFloat(rate)
+            }]);
+
+        if (error) {
+            alert("Signup error: " + error.message);
+            return;
+        }
+
         localStorage.setItem("userLocation", loc);
         localStorage.setItem("userRate", rate);
         localStorage.setItem("userTags", selectedTags.join(", "));
+
+    } else {
+        // Insert into Supabase owners table
+        const { error } = await getDB()
+            .from("owners")
+            .insert([{
+                full_name: fullName,
+                email: email,
+                // password: password
+            }]);
+
+        if (error) {
+            alert("Signup error: " + error.message);
+            return;
+        }
     }
+
     localStorage.setItem("loggedIn", "true");
     localStorage.setItem("userFirstName", firstName);
     localStorage.setItem("userLastName", lastName);
@@ -159,7 +213,6 @@ function handleSignup() {
     localStorage.setItem("userUsername", username);
     location.href = "profile.html";
 }
-
 // Fetches real sitters from Supabase database and renders them as cards
 // Removes decoy cards and replaces with live data
 // BACKEND: Connected to sitters table in Supabase - set up by Antoine
