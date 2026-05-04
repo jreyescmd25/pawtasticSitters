@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="paw-bg"></div>
+
+    <nav>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+        <div>
+            <button onclick="location.href='profile.html'">← Back</button>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-box" style="width:500px;">
+            <h2>Edit Profile</h2>
+
+            <!-- Displays current avatar - updates on selection -->
+            <div id="profileAvatar" style="font-size:80px; cursor:pointer;"></div>
+            
+            <p class="switch-page">Change Avatar</p>
+            <div id="avatarSelect" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <button class="tag-btn" onclick="selectAvatar(this, '🐶')">🐶</button>
+                <button class="tag-btn" onclick="selectAvatar(this, '🐱')">🐱</button>
+                <button class="tag-btn" onclick="selectAvatar(this, '🐾')">🐾</button>
+                <button class="tag-btn" onclick="selectAvatar(this, '🦴')">🦴</button>
+                <button class="tag-btn" onclick="selectAvatar(this, '🐠')">🐠</button>
+                <button class="tag-btn" onclick="selectAvatar(this, '🐦')">🐦</button>
+            </div>
+
+            <!-- BACKEND: Pre-filled from localStorage - replace with GET /api/user/profile -->
+            <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+                <input type="text" placeholder="First Name" id="editFirstName" oninput="validateLetters(this, 'firstNameError')">
+                <p class="field-error" id="firstNameError"></p>
+                <input type="text" placeholder="Last Name" id="editLastName" oninput="validateLetters(this, 'lastNameError')">
+                <p class="field-error" id="lastNameError"></p>
+                <input type="text" placeholder="@username" id="editUsername" oninput="validateUsername(this)" onfocus="addAt(this)">
+                <p class="field-error" id="usernameError"></p>
+                <input type="text" placeholder="Email" id="editEmail" oninput="validateEmail(this)">
+                <p class="field-error" id="emailError"></p>
+            </div>
+
+            <!-- Shown only if user role is sitter -->
+            <!-- BACKEND: saveProfile() sends to PATCH /api/user/profile -->
+            <div id="sitterEditDetails" style="display:none; flex-direction:column; gap:8px; width:100%;">
+                <input type="text" placeholder="Zip Code" id="editLocation" oninput="validateZip(this)" maxlength="5">
+                <p class="field-error" id="zipError"></p>
+                <p id="boroughMsg" class="switch-page" style="color:white;"></p>
+                <p class="switch-page">Specialty</p>
+                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button class="tag-btn" id="tagDog" onclick="toggleTag(this, 'Dog')">Dog</button>
+                    <button class="tag-btn" id="tagCat" onclick="toggleTag(this, 'Cat')">Cat</button>
+                    <button class="tag-btn" id="tagBird" onclick="toggleTag(this, 'Bird')">Bird</button>
+                    <button class="tag-btn" id="tagOther" onclick="toggleTag(this, 'Other')">Other</button>
+                </div>
+                <input type="number" placeholder="Hourly Rate ($/hr)" id="editRate">
+            </div>
+
+            <button onclick="saveProfile()" style="margin-top:20px;">Save Changes</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        if (!localStorage.getItem("loggedIn")) {
+            location.href = "login.html";
+        }
+
+        // BACKEND: Replace localStorage reads with GET /api/user/profile
+        let currentAvatar = localStorage.getItem("userAvatar") || "🐾";
+        document.getElementById("profileAvatar").textContent = currentAvatar;
+        document.getElementById("editFirstName").value = localStorage.getItem("userFirstName") || "";
+        document.getElementById("editLastName").value = localStorage.getItem("userLastName") || "";
+        document.getElementById("editUsername").value = localStorage.getItem("userUsername") || "";
+        document.getElementById("editEmail").value = localStorage.getItem("userEmail") || "";
+
+        const role = localStorage.getItem("userRole");
+        if (role === "sitter") {
+            document.getElementById("sitterEditDetails").style.display = "flex";
+            document.getElementById("editLocation").value = localStorage.getItem("userLocation") || "";
+            document.getElementById("editRate").value = localStorage.getItem("userRate") || "";
+
+            const existingTags = (localStorage.getItem("userTags") || "").split(", ");
+            existingTags.forEach(tag => {
+                const btn = document.getElementById("tag" + tag);
+                if (btn) {
+                    btn.style.backgroundColor = "#7b7bd4";
+                    selectedTags.push(tag);
+                }
+            });
+        }
+
+        function selectAvatar(btn, avatar) {
+            currentAvatar = avatar;
+            document.getElementById("profileAvatar").textContent = avatar;
+            document.querySelectorAll("#avatarSelect .tag-btn").forEach(b => {
+                b.style.backgroundColor = "rgb(53, 53, 102)";
+            });
+            btn.style.backgroundColor = "#7b7bd4";
+        }
+
+        // BACKEND: Replace localStorage writes with PATCH /api/user/profile
+        function saveProfile() {
+            const firstName = document.getElementById("editFirstName").value;
+            const lastName = document.getElementById("editLastName").value;
+            const username = document.getElementById("editUsername").value;
+            const email = document.getElementById("editEmail").value;
+
+            if (!firstName || !lastName || !username || !email) {
+                alert("Please fill in all fields!");
+                return;
+            }
+            if (!email.includes('@') || !email.includes('.')) {
+                alert("Please enter a valid email!");
+                return;
+            }
+
+            localStorage.setItem("userFirstName", firstName);
+            localStorage.setItem("userLastName", lastName);
+            localStorage.setItem("userUsername", username);
+            localStorage.setItem("userEmail", email);
+            localStorage.setItem("userAvatar", currentAvatar);
+
+            if (role === "sitter") {
+                const loc = document.getElementById("editLocation").value;
+                const rate = document.getElementById("editRate").value;
+                if (!loc || !rate || selectedTags.length === 0) {
+                    alert("Please fill in all sitter details!");
+                    return;
+                }
+                localStorage.setItem("userLocation", loc);
+                localStorage.setItem("userRate", rate);
+                localStorage.setItem("userTags", selectedTags.join(", "));
+            }
+
+            alert("Profile updated!");
+            location.href = "profile.html";
+        }
+    </script>
+</body>
+</html>

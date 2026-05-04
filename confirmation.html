@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="paw-bg"></div>
+
+    <nav>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+        <div>
+            <button onclick="goBack()">← Back</button>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-box" style="width:500px;">
+            <h2 id="confirmTitle">Book Appointment</h2>
+            <!-- Sitter name pulled from localStorage selectedSitter -->
+            <p id="sitterName" class="sitter-location" style="font-size:18px; color:white;"></p>
+
+            <div style="display:flex; flex-direction:column; gap:15px; width:100%;">
+                <div>
+                    <p class="switch-page" style="text-align:left; margin-bottom:5px;">Date</p>
+                    <!-- Min date set to today by inline script -->
+                    <input type="date" id="appointmentDate" style="width:100%; box-sizing:border-box;" oninput="updateMinTime()">
+                </div>
+                <div>
+                    <p class="switch-page" style="text-align:left; margin-bottom:5px;">Time</p>
+                    <!-- Min time set dynamically if today is selected -->
+                    <input type="time" id="appointmentTime" style="width:100%; box-sizing:border-box;">
+                </div>
+                <div>
+                    <p class="switch-page" style="text-align:left; margin-bottom:5px;">Which pet needs sitting?</p>
+                    <!-- Sets selectedPet variable in inline script -->
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="tag-btn" onclick="selectPet(this, 'Dog')">Dog</button>
+                        <button class="tag-btn" onclick="selectPet(this, 'Cat')">Cat</button>
+                        <button class="tag-btn" onclick="selectPet(this, 'Bird')">Bird</button>
+                        <button class="tag-btn" onclick="selectPet(this, 'Other')">Other</button>
+                    </div>
+                    <p class="field-error" id="petError"></p>
+                </div>
+                <div>
+                    <p class="switch-page" style="text-align:left; margin-bottom:5px;">Duration</p>
+                    <!-- Updates total price display when changed -->
+                    <select id="appointmentDuration" style="width:100%; padding:10px; border-radius:15px; background:rgb(53,53,102); color:white; font-family:'Lilita One', sans-serif; font-size:16px; border:none; outline:none;">
+                        <option value="1">1 hour</option>
+                        <option value="2">2 hours</option>
+                        <option value="3">3 hours</option>
+                        <option value="4">4 hours</option>
+                        <option value="8">Full day (8 hours)</option>
+                    </select>
+                </div>
+                <div>
+                    <p class="switch-page" style="text-align:left; margin-bottom:5px;">Notes for sitter (optional)</p>
+                    <textarea id="appointmentNotes" placeholder="Any special instructions..." style="width:100%; box-sizing:border-box; padding:10px; border-radius:15px; background:rgb(53,53,102); color:white; font-family:'Lilita One', sans-serif; font-size:14px; border:none; outline:none; resize:none; height:80px;"></textarea>
+                </div>
+            </div>
+
+            <!-- Total price calculated from duration x sitter rate -->
+            <p id="totalPrice" class="sitter-rate" style="margin-top:10px;"></p>
+            <!-- BACKEND: confirmBooking() saves to localStorage - replace with POST /api/bookings -->
+            <button onclick="confirmBooking()" style="margin-top:10px;">Confirm Booking</button>
+            <button onclick="goBack()" style="margin-top:5px; background:rgba(255,255,255,0.1);">Cancel</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // BACKEND: Replace localStorage with GET /api/sitters/:id for sitter name and rate
+        const sitterName = localStorage.getItem("selectedSitter") || "Unknown Sitter";
+        const sitterRates = {
+            "Maria Lopez": 15,
+            "James Carter": 12,
+            "Sofia Reyes": 18
+        };
+
+        document.getElementById("sitterName").textContent = sitterName;
+        document.getElementById("confirmTitle").textContent = `Book with ${sitterName}`;
+
+        function updatePrice() {
+            const duration = document.getElementById("appointmentDuration").value;
+            const rate = sitterRates[sitterName] || 15;
+            const total = duration * rate;
+            document.getElementById("totalPrice").textContent = `Total: $${total}`;
+        }
+
+        document.getElementById("appointmentDuration").addEventListener("change", updatePrice);
+        updatePrice();
+
+        function goBack() {
+            history.back();
+        }
+
+        // BACKEND: Replace localStorage.setItem with POST /api/bookings
+        // Expected body: { sitter_id, owner_id, pet, date, time, duration, notes, status: "Pending" }
+        function confirmBooking() {
+            const date = document.getElementById("appointmentDate").value;
+            const time = document.getElementById("appointmentTime").value;
+            const duration = document.getElementById("appointmentDuration").value;
+
+            if (!selectedPet) {
+                document.getElementById("petError").textContent = "Please select a pet type!";
+                return;
+            }
+            if (!date || !time) {
+                alert("Please select a date and time!");
+                return;
+            }
+
+            const booking = {
+                sitter: sitterName,
+                pet: selectedPet,
+                date, time, duration,
+                notes: document.getElementById("appointmentNotes").value,
+                status: "Pending"
+            };
+
+            const existing = JSON.parse(localStorage.getItem("appointments") || "[]");
+            existing.push(booking);
+            localStorage.setItem("appointments", JSON.stringify(existing));
+            location.href = "confirmed.html";
+        }
+
+        let selectedPet = '';
+
+        function selectPet(btn, pet) {
+            selectedPet = pet;
+            document.querySelectorAll(".tag-btn").forEach(b => {
+                b.style.backgroundColor = "rgb(53, 53, 102)";
+            });
+            btn.style.backgroundColor = "#7b7bd4";
+            document.getElementById("petError").textContent = "";
+        }
+
+        // Prevents booking in the past
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        document.getElementById("appointmentDate").min = todayStr;
+
+        // Prevents selecting past time if today is selected
+        function updateMinTime() {
+            const selectedDate = document.getElementById("appointmentDate").value;
+            const timeInput = document.getElementById("appointmentTime");
+            if (selectedDate === todayStr) {
+                const now = new Date();
+                const hh = String(now.getHours()).padStart(2, '0');
+                const min = String(now.getMinutes()).padStart(2, '0');
+                timeInput.min = `${hh}:${min}`;
+            } else {
+                timeInput.min = "";
+            }
+        }
+    </script>
+</body>
+</html>

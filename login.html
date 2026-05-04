@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
     <div class="paw-bg"></div>
 
     <nav>
@@ -17,8 +16,11 @@
     <section class="form-section">
         <div class="form-box">
             <h2>Welcome Back!</h2>
-            <input type="text" placeholder="Email" id="loginEmail">
-            <input type="password" placeholder="Password" id="loginPassword">
+            <!-- BACKEND: handleLogin() in script.js sends these to /api/login -->
+            <input type="text" placeholder="Email" id="loginEmail" oninput="validateEmail(this)">
+            <p class="field-error" id="emailError"></p>
+            <input type="password" placeholder="Password" id="loginPassword" oninput="validatePassword(this)">
+            <p class="field-error" id="passwordError"></p>
             <button onclick="handleLogin()">Login</button>
             <p class="switch-page">Don't have an account? <span onclick="location.href='signup.html'">Sign Up</span></p>
         </div>

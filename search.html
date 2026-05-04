@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Sitters</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="paw-bg"></div>
+
+    <nav>
+        <!-- Title updates dynamically to show zip being searched -->
+        <h1 class="title" id="searchTitle">Searching...</h1>
+        <div>
+            <button onclick="location.href='index.html'">← Home</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <!-- Allows user to change zip without going back to homepage -->
+                <input type="text" id="newZipInput" placeholder="Change zip code..." onkeypress="return event.charCode >= 48 && event.charCode <= 57" maxlength="5" oninput="validateNewZip(this)">
+                <button onclick="updateSearch()">GO</button>
+            </div>
+            <p class="field-error" id="newZipError" style="text-align:center;"></p>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:300px;">
+                <!-- BACKEND: Pass range value to /api/sitters/nearby?zip=XXXXX&range=X -->
+                <p class="switch-page" style="color:white;" id="rangeLabel">Range: 5 miles</p>
+                <input type="range" id="rangeSlider" min="5" max="25" value="5" step="5" oninput="updateRange(this)" style="width:100%; accent-color:#7b7bd4;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <span class="switch-page">5mi</span>
+                    <span class="switch-page">15mi</span>
+                    <span class="switch-page">25mi</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-sitters">
+        <div class="sitter-grid" id="searchResults">
+            <!-- DECOY SITTERS - delete when database is connected -->
+            <!-- BACKEND: Replace with results from /api/sitters/nearby?zip=XXXXX&range=X -->
+
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐶</div>
+                <h3>Maria Lopez</h3>
+                <p class="sitter-location">Bronx, NY · 2.3 mi</p>
+                <div class="sitter-tags">
+                    <span class="tag">Dog</span>
+                    <span class="tag">Cat</span>
+                </div>
+                <p class="sitter-rate">$15/hr</p>
+                <button onclick="handleSitterClick('Maria Lopez')">Book</button>
+            </div>
+
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐈</div>
+                <h3>James Carter</h3>
+                <p class="sitter-location">Brooklyn, NY · 4.1 mi</p>
+                <div class="sitter-tags">
+                    <span class="tag">Cat</span>
+                    <span class="tag">Bird</span>
+                </div>
+                <p class="sitter-rate">$12/hr</p>
+                <button onclick="handleSitterClick('James Carter')">Book</button>
+            </div>
+
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐾</div>
+                <h3>Sofia Reyes</h3>
+                <p class="sitter-location">Queens, NY · 6.7 mi</p>
+                <div class="sitter-tags">
+                    <span class="tag">Dog</span>
+                    <span class="tag">Other</span>
+                </div>
+                <p class="sitter-rate">$18/hr</p>
+                <button onclick="handleSitterClick('Sofia Reyes')">Book</button>
+            </div>
+
+            <!-- END DECOY SITTERS -->
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // Gets zip from URL parameter passed by searchNearby() in script.js
+        const params = new URLSearchParams(window.location.search);
+        const zip = params.get('zip') || '';
+        document.getElementById("searchTitle").textContent = zip ? `Sitters near ${zip}` : "Search Sitters";
+        if (zip) document.getElementById("newZipInput").value = zip;
+
+        // Updates range label display
+        function updateRange(slider) {
+            document.getElementById("rangeLabel").textContent = `Range: ${slider.value} miles`;
+        }
+
+        // Reloads page with new zip
+        function updateSearch() {
+            const newZip = document.getElementById("newZipInput").value;
+            if (newZip.length < 5) {
+                document.getElementById("newZipError").textContent = "Enter a valid 5-digit zip code!";
+                return;
+            }
+            location.href = `search.html?zip=${newZip}`;
+        }
+
+        // Checks login before allowing booking - shows prompt if not logged in
+        function handleSitterClick(name) {
+            if (!localStorage.getItem("loggedIn")) {
+                document.getElementById("loginPrompt").style.display = "flex";
+                localStorage.setItem("selectedSitter", name);
+                return;
+            }
+            // BACKEND: Store selected sitter ID not just name
+            localStorage.setItem("selectedSitter", name);
+            location.href = "confirmation.html";
+        }
+
+        // Blocks non-numeric input on zip change field
+        function validateNewZip(input) {
+            const error = document.getElementById("newZipError");
+            input.value = input.value.replace(/[^0-9]/g, '').slice(0, 5);
+            if (input.value.length > 0 && input.value.length < 5) {
+                error.textContent = "Enter a valid 5-digit zip code!";
+            } else {
+                error.textContent = "";
+            }
+        }
+    </script>
+
+    <!-- Shown when user tries to book without being logged in -->
+    <div id="loginPrompt" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
+        <div class="form-box" style="width:350px; gap:15px;">
+            <h2>Hold On!</h2>
+            <p class="switch-page" style="color:white;">You need an account to book a sitter.</p>
+            <button onclick="location.href='signup.html'">Create Account</button>
+            <button onclick="location.href='login.html'" style="background:rgba(255,255,255,0.1);">Already have one? Login</button>
+            <button onclick="document.getElementById('loginPrompt').style.display='none'" style="background:none; font-size:14px; padding:5px;">Cancel</button>
+        </div>
+    </div>
+</body>
+</html>

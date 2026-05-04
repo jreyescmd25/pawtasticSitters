@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Paw-tastic Sitters</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="paw-bg"></div>
+
+    <nav>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+        <div>
+            <button onclick="location.href='index.html'">Home</button>
+            <!-- logout() in script.js clears session -->
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="form-box" style="width: 500px;">
+            <!-- BACKEND: All fields below pulled from localStorage - replace with /api/user/profile -->
+            <div class="sitter-avatar" style="font-size: 80px;" id="profileAvatar">🐾</div>
+            <h2 id="profileName"></h2>
+            <h2 id="profileUsername"></h2>
+            <p id="profileEmail" class="sitter-location"></p>
+            <div id="roleTag" style="margin-top: 10px;"></div>
+            <!-- Sitter-only fields populated by inline script below -->
+            <div id="sitterInfo"></div>
+            <button onclick="location.href='editProfile.html'" style="margin-top: 20px;">Edit Profile</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // Redirect if not logged in
+        if (!localStorage.getItem("loggedIn")) {
+            location.href = "login.html";
+        }
+
+        // BACKEND: Replace localStorage reads with GET /api/user/profile
+        const firstName = localStorage.getItem("userFirstName") || "";
+        const lastName = localStorage.getItem("userLastName") || "";
+        const email = localStorage.getItem("userEmail") || "";
+        const role = localStorage.getItem("userRole") || "";
+        const location_val = localStorage.getItem("userLocation") || "";
+        const rate = localStorage.getItem("userRate") || "";
+        const tags = localStorage.getItem("userTags") || "";
+
+        document.getElementById("profileName").textContent = firstName + " " + lastName;
+        document.getElementById("profileUsername").textContent = localStorage.getItem("userUsername") || "";
+        document.getElementById("profileAvatar").textContent = localStorage.getItem("userAvatar") || "🐾";
+        document.getElementById("profileEmail").textContent = "Email: " + email;
+
+        // Shows sitter-specific info if role is sitter
+        if (role === "sitter") {
+            document.getElementById("roleTag").innerHTML = `<span class="tag" style="font-size:16px; padding:8px 20px;">Pet Sitter</span>`;
+            document.getElementById("sitterInfo").innerHTML = `
+                <p class="sitter-location">Location: ${location_val}</p>
+                <div class="sitter-tags" style="margin-top:15px;">
+                    ${tags.split(", ").map(t => `<span class="tag">${t}</span>`).join("")}
+                </div>
+                <p class="sitter-rate" style="margin-top:10px;">$${rate}/hr</p>
+            `;
+        } else {
+            document.getElementById("roleTag").innerHTML = `<span class="tag" style="font-size:16px; padding:8px 20px;">Pet Owner</span>`;
+            document.getElementById("sitterInfo").innerHTML = "";
+        }
+    </script>
+</body>
+</html>

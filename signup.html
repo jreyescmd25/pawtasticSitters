@@ -17,41 +17,62 @@
         <div class="form-box">
             <h2>Create Account</h2>
 
-            <!-- STEP 1: Choose role -->
+            <!-- STEP 1: Role selection - sets selectedRole variable in script.js -->
             <div id="roleSelection">
                 <p class="switch-page">I am a...</p>
                 <div style="display:flex; gap:15px; justify-content:center;">
-                    <button onclick="selectRole('owner')">🐾 Pet Owner</button>
-                    <button onclick="selectRole('sitter')">🐶 Pet Sitter</button>
+                    <button id="ownerBtn" onclick="selectRole('owner')">Pet Owner</button>
+                    <button id="sitterBtn" onclick="selectRole('sitter')">Pet Sitter</button>
                 </div>
             </div>
 
-            <!-- STEP 2: Basic info (both roles) -->
-            <div id="basicInfo" style="display:none; flex-direction:column; gap:15px;">
-                <input type="text" placeholder="Full Name" id="signupName">
-                <input type="text" placeholder="Email" id="signupEmail">
-                <input type="password" placeholder="Password" id="signupPassword">
-                <input type="password" placeholder="Confirm Password" id="signupConfirm">
+            <!-- STEP 2: Basic info - shown after role is selected -->
+            <div id="basicInfo" style="display:none; flex-direction:column; gap:8px;">
+                <input type="text" placeholder="First Name" id="signupFirstName" oninput="validateLetters(this, 'firstNameError')">
+                <p class="field-error" id="firstNameError"></p>
+                <input type="text" placeholder="Last Name" id="signupLastName" oninput="validateLetters(this, 'lastNameError')">
+                <p class="field-error" id="lastNameError"></p>
+                <input type="text" placeholder="Email" id="signupEmail" oninput="validateEmail(this)">
+                <p class="field-error" id="emailError"></p>
+                <input type="password" placeholder="Password" id="signupPassword" oninput="validatePassword(this)">
+                <p class="field-error" id="passwordError"></p>
+                <input type="password" placeholder="Confirm Password" id="signupConfirm" oninput="validateConfirm(this)">
+                <p class="field-error" id="confirmError"></p>
+                <input type="text" placeholder="@username" id="signupUsername" oninput="validateUsername(this)" onfocus="addAt(this)">
+                <p class="field-error" id="usernameError"></p>
+                <p class="switch-page">Choose your avatar</p>
+                <!-- Avatar selection - sets selectedAvatar variable in script.js -->
+                <div id="avatarSelect" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button class="tag-btn" onclick="selectAvatar(this, '🐶')">🐶</button>
+                    <button class="tag-btn" onclick="selectAvatar(this, '🐱')">🐱</button>
+                    <button class="tag-btn" onclick="selectAvatar(this, '🐾')">🐾</button>
+                    <button class="tag-btn" onclick="selectAvatar(this, '🦴')">🦴</button>
+                    <button class="tag-btn" onclick="selectAvatar(this, '🐠')">🐠</button>
+                    <button class="tag-btn" onclick="selectAvatar(this, '🐦')">🐦</button>
+                </div>
             </div>
 
-            <!-- STEP 3: Sitter details (sitter only) -->
-            <div id="sitterDetails" style="display:none; flex-direction:column; gap:15px;">
-                <input type="text" placeholder="Your Location (e.g. Bronx, NY)" id="sitterLocation">
-                
+            <!-- STEP 3: Sitter only - shown when role is sitter -->
+            <!-- BACKEND: location, rate, tags sent to /api/register as sitter profile data -->
+            <div id="sitterDetails" style="display:none; flex-direction:column; gap:8px;">
+                <input type="text" placeholder="Your Zip Code" id="sitterLocation" oninput="validateZip(this)" maxlength="5">
+                <p class="field-error" id="zipError"></p>
+                <!-- Auto-detects NYC borough from zip -->
+                <p id="boroughMsg" class="switch-page" style="color:white;"></p>
                 <p class="switch-page">Specialty (select all that apply)</p>
+                <!-- Sets selectedTags array in script.js -->
                 <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                    <button class="tag-btn" onclick="toggleTag(this, 'dog')">🐕 Dog</button>
-                    <button class="tag-btn" onclick="toggleTag(this, 'cat')">🐈 Cat</button>
-                    <button class="tag-btn" onclick="toggleTag(this, 'bird')">🐦 Bird</button>
-                    <button class="tag-btn" onclick="toggleTag(this, 'other')">🐾 Other</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'Dog')">Dog</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'Cat')">Cat</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'Bird')">Bird</button>
+                    <button class="tag-btn" onclick="toggleTag(this, 'Other')">Other</button>
                 </div>
-
                 <input type="number" placeholder="Hourly Rate ($/hr)" id="hourlyRate">
             </div>
 
-            <!-- Submit button -->
+            <!-- Shown after role is selected -->
+            <!-- BACKEND: handleSignup() sends all data to /api/register -->
             <button id="submitBtn" style="display:none;" onclick="handleSignup()">Create Account</button>
-
             <p class="switch-page">Already have an account? <span onclick="location.href='login.html'">Login</span></p>
         </div>
     </section>

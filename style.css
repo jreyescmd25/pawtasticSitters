@@ -364,3 +364,41 @@ input::placeholder {
     font-size: 16px;
     padding: 10px 20px;
 }
+
+.field-error {
+    color: red;
+    font-family: 'Lilita One', sans-serif;
+    font-size: 12px;
+    margin-top: -10px;
+    text-align: left;
+}
+
+.form-box input {
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 2px solid rgba(255,255,255,0.4);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 10px 5px;
+}
+
+.form-box input:focus {
+    border-bottom: 2px solid white;
+}
+
+.field-error {
+    color: red;
+    font-family: 'Lilita One', sans-serif;
+    font-size: 12px;
+    margin: 0;
+    text-align: left;
+    min-height: 16px;
+}
+
+#basicInfo, #sitterDetails {
+    gap: 15px !important;
+}
+

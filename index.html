@@ -1,51 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetSitter App</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJWrY5j423_nacNNRZyk2laI7RD1eWJyQ&callback=initMap" async defer></script>
-    <link rel = "icon" href = "/assets/images/pet.png" type = "image/icon">
 </head>
-
 <body>
 
     <div class="paw-bg"></div>
 
     <nav>
-        <h1 class="title">Paw-tastic Sitters!</h1>
-        <div>
-            <button onclick="location.href='login.html'">Login</button>
-            <button onclick="location.href='signup.html'">Sign Up</button>
+        <h1 class="title" onclick="location.href='index.html'" style="cursor:pointer">Paw-tastic Sitters!</h1>
+        <div style="display:flex; gap:10px;">
+            <!-- Shown when user is logged out -->
+            <button id="loginBtn" onclick="location.href='login.html'">Login</button>
+            <button id="signupBtn" onclick="location.href='signup.html'">Sign Up</button>
+            <!-- Shown when user is logged in - toggled by script.js DOMContentLoaded -->
+            <button id="profileBtn" style="display:none" onclick="location.href='profile.html'">My Profile</button>
+            <button id="bookingsBtn" style="display:none" onclick="location.href='bookings.html'">My Bookings</button>
         </div>
     </nav>
 
     <section class="hero">
         <h2>Find a Pet Sitter Near You!</h2>
-        <div class="search-bar">
-            <input type="text" id="zipInput" placeholder="Enter your zip code...">
-            <button onclick="searchSitters()">Search</button>
+        <div class="search-bar" style="display:flex; flex-direction:row; align-items:center; gap:10px;">
+            <!-- Zip input - numbers only, max 5 digits -->
+            <input type="text" id="zipInput" placeholder="Enter your zip code..." oninput="validateZipSearch(this)" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            <!-- Redirects to search.html with zip as URL param -->
+            <button onclick="searchNearby()">Search Nearby</button>
         </div>
+        <p class="field-error" id="searchZipError" style="text-align:center;"></p>
         <p id="errorMsg"></p>
     </section>
-
-    <section class="map-section">
-        <div id="map"></div>
-    </section>
-
 
     <section class="featured-sitters">
         <h2 class="section-title">Featured Sitters</h2>
         <div class="sitter-grid" id="sitterGrid">
 
             <!-- DECOY CARDS - delete when database is connected -->
+            <!-- BACKEND: Call loadFeaturedSitters() on page load to replace these with real data from /api/sitters -->
 
             <div class="sitter-card">
                 <div class="sitter-avatar">🐶</div>
                 <h3>Maria Lopez</h3>
-                <p class="sitter-location">📍 Bronx, NY</p>
+                <p class="sitter-location">Bronx, NY</p>
                 <div class="sitter-tags">
                     <span class="tag">Dog</span>
                     <span class="tag">Cat</span>
@@ -57,7 +56,7 @@
             <div class="sitter-card">
                 <div class="sitter-avatar">🐈</div>
                 <h3>James Carter</h3>
-                <p class="sitter-location">📍 Brooklyn, NY</p>
+                <p class="sitter-location">Brooklyn, NY</p>
                 <div class="sitter-tags">
                     <span class="tag">Cat</span>
                     <span class="tag">Bird</span>
@@ -69,7 +68,7 @@
             <div class="sitter-card">
                 <div class="sitter-avatar">🐾</div>
                 <h3>Sofia Reyes</h3>
-                <p class="sitter-location">📍 Queens, NY</p>
+                <p class="sitter-location">Queens, NY</p>
                 <div class="sitter-tags">
                     <span class="tag">Dog</span>
                     <span class="tag">Other</span>
@@ -80,12 +79,10 @@
 
             <!-- END DECOY CARDS -->
 
-            <!-- DATABASE CARDS GO HERE -->
-
         </div>
     </section>
 
-    <!-- MESSAGE MODAL -->
+    <!-- BACKEND: Messages stored in localStorage for now - replace with Supabase realtime messages table -->
     <div id="messageModal" style="display:none;">
         <div class="modal-box">
             <div class="modal-header">
@@ -93,7 +90,7 @@
                 <button onclick="closeModal()" class="close-btn">✕</button>
             </div>
             <div class="chat-box" id="chatBox">
-                <div class="msg received">Hey! I'm available this weekend 🐾</div>
+                <div class="msg received">Hey! I'm available this weekend</div>
             </div>
             <div class="chat-input">
                 <input type="text" id="msgInput" placeholder="Type a message...">
