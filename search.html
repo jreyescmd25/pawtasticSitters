@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Sitters</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,7 +27,7 @@
             </div>
             <p class="field-error" id="newZipError" style="text-align:center;"></p>
             <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:300px;">
-                <!-- BACKEND: Pass range value to /api/sitters/nearby?zip=XXXXX&range=X -->
+                <!-- backend: Pass range value to /api/sitters/nearby?zip=XXXXX&range=X -->
                 <p class="switch-page" style="color:white;" id="rangeLabel">Range: 5 miles</p>
                 <input type="range" id="rangeSlider" min="5" max="25" value="5" step="5" oninput="updateRange(this)" style="width:100%; accent-color:#7b7bd4;">
                 <div style="display:flex; justify-content:space-between; width:100%;">
@@ -40,46 +41,9 @@
 
     <section class="featured-sitters">
         <div class="sitter-grid" id="searchResults">
-            <!-- DECOY SITTERS - delete when database is connected -->
-            <!-- BACKEND: Replace with results from /api/sitters/nearby?zip=XXXXX&range=X -->
-
-            <div class="sitter-card">
-                <div class="sitter-avatar">🐶</div>
-                <h3>Maria Lopez</h3>
-                <p class="sitter-location">Bronx, NY · 2.3 mi</p>
-                <div class="sitter-tags">
-                    <span class="tag">Dog</span>
-                    <span class="tag">Cat</span>
-                </div>
-                <p class="sitter-rate">$15/hr</p>
-                <button onclick="handleSitterClick('Maria Lopez')">Book</button>
-            </div>
-
-            <div class="sitter-card">
-                <div class="sitter-avatar">🐈</div>
-                <h3>James Carter</h3>
-                <p class="sitter-location">Brooklyn, NY · 4.1 mi</p>
-                <div class="sitter-tags">
-                    <span class="tag">Cat</span>
-                    <span class="tag">Bird</span>
-                </div>
-                <p class="sitter-rate">$12/hr</p>
-                <button onclick="handleSitterClick('James Carter')">Book</button>
-            </div>
-
-            <div class="sitter-card">
-                <div class="sitter-avatar">🐾</div>
-                <h3>Sofia Reyes</h3>
-                <p class="sitter-location">Queens, NY · 6.7 mi</p>
-                <div class="sitter-tags">
-                    <span class="tag">Dog</span>
-                    <span class="tag">Other</span>
-                </div>
-                <p class="sitter-rate">$18/hr</p>
-                <button onclick="handleSitterClick('Sofia Reyes')">Book</button>
-            </div>
-
-            <!-- END DECOY SITTERS -->
+            <!-- backend: loadSearchSitters() called on page load to populate with sitters from database -->
+            <!-- Shows sitters matching zip and range criteria - if none, show message -->
+            <p class="switch-page" style="color:white; text-align:center; width:100%;">Loading sitters...</p>
         </div>
     </section>
 
@@ -113,7 +77,7 @@
                 localStorage.setItem("selectedSitter", name);
                 return;
             }
-            // BACKEND: Store selected sitter ID not just name
+            // backend: Store selected sitter ID not just name
             localStorage.setItem("selectedSitter", name);
             location.href = "confirmation.html";
         }
@@ -128,6 +92,32 @@
                 error.textContent = "";
             }
         }
+        async function loadSearchSitters() {
+            const grid = document.getElementById("searchResults");
+            if (!grid) return;
+
+            const { data: sitters, error } = await database.from("sitters").select("*");
+            if (error) { console.log(error.message); return; }
+
+            grid.innerHTML = '';
+            sitters.forEach(sitter => {
+                grid.innerHTML += `
+                    <div class="sitter-card">
+                        <div class="sitter-avatar">🐾</div>
+                        <h3>${sitter.full_name}</h3>
+                        <p class="sitter-location">${sitter.location}</p>
+                        <div class="sitter-tags">
+                            ${sitter.specialties.map(tag => `<span class="tag">${tag}</span>`).join("")}
+                        </div>
+                        <p class="sitter-rate">$${sitter.hourly_rate}/hr</p>
+                        <button onclick="handleSitterClick('${sitter.full_name}')">Book</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.addEventListener("load", loadSearchSitters);
+
     </script>
 
     <!-- Shown when user tries to book without being logged in -->
