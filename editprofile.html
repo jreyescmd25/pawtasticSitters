@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -33,7 +35,7 @@
                 <button class="tag-btn" onclick="selectAvatar(this, '🐦')">🐦</button>
             </div>
 
-            <!-- BACKEND: Pre-filled from localStorage - replace with GET /api/user/profile -->
+            <!-- backend: Pre-filled from localStorage - replace with GET /api/user/profile -->
             <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
                 <input type="text" placeholder="First Name" id="editFirstName" oninput="validateLetters(this, 'firstNameError')">
                 <p class="field-error" id="firstNameError"></p>
@@ -46,7 +48,7 @@
             </div>
 
             <!-- Shown only if user role is sitter -->
-            <!-- BACKEND: saveProfile() sends to PATCH /api/user/profile -->
+            <!-- backend: saveProfile() sends to PATCH /api/user/profile -->
             <div id="sitterEditDetails" style="display:none; flex-direction:column; gap:8px; width:100%;">
                 <input type="text" placeholder="Zip Code" id="editLocation" oninput="validateZip(this)" maxlength="5">
                 <p class="field-error" id="zipError"></p>
@@ -71,7 +73,7 @@
             location.href = "login.html";
         }
 
-        // BACKEND: Replace localStorage reads with GET /api/user/profile
+        // backend: Replace localStorage reads with GET /api/user/profile
         let currentAvatar = localStorage.getItem("userAvatar") || "🐾";
         document.getElementById("profileAvatar").textContent = currentAvatar;
         document.getElementById("editFirstName").value = localStorage.getItem("userFirstName") || "";
@@ -104,7 +106,7 @@
             btn.style.backgroundColor = "#7b7bd4";
         }
 
-        // BACKEND: Replace localStorage writes with PATCH /api/user/profile
+        // backend: Replace localStorage writes with PATCH /api/user/profile
         function saveProfile() {
             const firstName = document.getElementById("editFirstName").value;
             const lastName = document.getElementById("editLastName").value;

@@ -1,9 +1,11 @@
 // Supabase credentials - cloud database set up by Antoine
 // URL is the database endpoint, ANON_KEY is the public access key
+// Supabase credentials - cloud database set up by Antoine
 const SUPABASE_URL = "https://nkerqwvpxcalmcrycddz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo";
-const database = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+function getDB() {
+    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 // Handles map initialization - remove if map is not used
 let map;
@@ -17,17 +19,55 @@ function initMap() {
     });
 }
 
-// backend: Replace localStorage with POST /api/login - expects { email, password }
-function handleLogin() {
+// BACKEND: Queries Supabase for user data after login - replace localStorage with session token
+async function handleLogin() {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
     if (!email || !password) {
         alert("Please fill in all fields!");
         return;
     }
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("userEmail", email);
-    location.href = "profile.html";
+
+    // Check owners table first
+    const { data: owner } = await getDB()
+        .from("owners")
+        .select("*")
+        .eq("email", email)
+        .eq("password", password)
+        .single();
+
+    if (owner) {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", owner.email);
+        localStorage.setItem("userFirstName", owner.full_name.split(" ")[0]);
+        localStorage.setItem("userLastName", owner.full_name.split(" ").slice(1).join(" "));
+        localStorage.setItem("userRole", "owner");
+        location.href = "profile.html";
+        return;
+    }
+
+    // Check sitters table
+    const { data: sitter } = await getDB()
+        .from("sitters")
+        .select("*")
+        .eq("email", email)
+        .eq("password", password)
+        .single();
+
+    if (sitter) {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("userEmail", sitter.email);
+        localStorage.setItem("userFirstName", sitter.full_name.split(" ")[0]);
+        localStorage.setItem("userLastName", sitter.full_name.split(" ").slice(1).join(" "));
+        localStorage.setItem("userRole", "sitter");
+        localStorage.setItem("userLocation", sitter.location);
+        localStorage.setItem("userRate", sitter.hourly_rate);
+        localStorage.setItem("userTags", sitter.specialties.join(", "));
+        location.href = "profile.html";
+        return;
+    }
+
+    document.getElementById("loginError").style.display = "flex";
 }
 
 let selectedRole = '';
@@ -127,7 +167,7 @@ async function loadFeaturedSitters() {
     const grid = document.getElementById("sitterGrid");
     if (!grid) return;
 
-    const { data: sitters, error } = await database.from("sitters").select("*");
+    const { data: sitters, error } = await getDB().from("sitters").select("*");
     if (error) { console.log(error.message); return; }
 
     grid.innerHTML = '';
