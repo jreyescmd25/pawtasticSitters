@@ -21,7 +21,7 @@
 
     <section class="form-section">
         <div class="form-box" style="width: 500px;">
-            <!-- BACKEND: All fields below pulled from localStorage - replace with /api/user/profile -->
+            <!-- backend: All fields below pulled from localStorage - replace with /api/user/profile -->
             <div class="sitter-avatar" style="font-size: 80px;" id="profileAvatar">🐾</div>
             <h2 id="profileName"></h2>
             <h2 id="profileUsername"></h2>
@@ -29,18 +29,18 @@
             <div id="roleTag" style="margin-top: 10px;"></div>
             <!-- Sitter-only fields populated by inline script below -->
             <div id="sitterInfo"></div>
-            <button onclick="location.href='editProfile.html'" style="margin-top: 20px;">Edit Profile</button>
+            <button onclick="location.href='editprofile.html'" style="margin-top: 20px;">Edit Profile</button>
         </div>
     </section>
 
-    <script src="script.js"></script>
+
     <script>
         // Redirect if not logged in
         if (!localStorage.getItem("loggedIn")) {
             location.href = "login.html";
         }
 
-        // BACKEND: Replace localStorage reads with GET /api/user/profile
+        // backend: Replace localStorage reads with GET /api/user/profile
         const firstName = localStorage.getItem("userFirstName") || "";
         const lastName = localStorage.getItem("userLastName") || "";
         const email = localStorage.getItem("userEmail") || "";
@@ -69,5 +69,8 @@
             document.getElementById("sitterInfo").innerHTML = "";
         }
     </script>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
