@@ -1,3 +1,10 @@
+// Supabase credentials - cloud database set up by Antoine
+// URL is the database endpoint, ANON_KEY is the public access key
+const SUPABASE_URL = "https://nkerqwvpxcalmcrycddz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo";
+const database = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
 // Handles map initialization - remove if map is not used
 let map;
 
@@ -10,7 +17,7 @@ function initMap() {
     });
 }
 
-// BACKEND: Replace localStorage with POST /api/login - expects { email, password }
+// backend: Replace localStorage with POST /api/login - expects { email, password }
 function handleLogin() {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
@@ -58,7 +65,7 @@ function toggleTag(btn, tag) {
     }
 }
 
-// BACKEND: Replace localStorage with POST /api/register - expects { firstName, lastName, email, password, username, role, avatar, location, rate, tags }
+// backend: Replace localStorage with POST /api/register - expects { firstName, lastName, email, password, username, role, avatar, location, rate, tags }
 function handleSignup() {
     const firstName = document.getElementById("signupFirstName").value;
     const lastName = document.getElementById("signupLastName").value;
@@ -113,28 +120,36 @@ function handleSignup() {
     location.href = "profile.html";
 }
 
-// BACKEND: Replace fetch URL with Supabase endpoint - expects [{ name, location, rate, avatar, tags }]
-// Also remove decoy cards from index.html when connected
-function loadFeaturedSitters() {
-    fetch("http://127.0.0.1:5000/api/sitters")
-    .then(res => res.json())
-    .then(sitters => {
-        const grid = document.getElementById("sitterGrid");
-        sitters.forEach(sitter => {
-            grid.innerHTML += `
-                <div class="sitter-card">
-                    <div class="sitter-avatar">🐾</div>
-                    <h3>${sitter.name}</h3>
-                    <p class="sitter-location">${sitter.location}</p>
-                    <p class="sitter-rate">$${sitter.rate}/hr</p>
-                    <button onclick="openModal('${sitter.name}')">Message</button>
+// Fetches real sitters from Supabase database and renders them as cards
+// Removes decoy cards and replaces with live data
+// BACKEND: Connected to sitters table in Supabase - set up by Antoine
+async function loadFeaturedSitters() {
+    const grid = document.getElementById("sitterGrid");
+    if (!grid) return;
+
+    const { data: sitters, error } = await database.from("sitters").select("*");
+    if (error) { console.log(error.message); return; }
+
+    grid.innerHTML = '';
+    sitters.forEach(sitter => {
+        grid.innerHTML += `
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐾</div>
+                <h3>${sitter.full_name}</h3>
+                <p class="sitter-location">${sitter.location}</p>
+                <div class="sitter-tags">
+                    ${sitter.specialties.map(tag => `<span class="tag">${tag}</span>`).join("")}
                 </div>
-            `;
-        });
+                <p class="sitter-rate">$${sitter.hourly_rate}/hr</p>
+                <button onclick="openModal('${sitter.full_name}')">Message</button>
+            </div>
+        `;
     });
 }
 
-// Opens chat modal - BACKEND: Replace localStorage messages with Supabase realtime messages table
+// Runs on page load to populate featured sitters section
+window.addEventListener("load", loadFeaturedSitters);
+// Opens chat modal - backend: Replace localStorage messages with Supabase realtime messages table
 function openModal(name) {
     document.getElementById("modalSitterName").textContent = "Chat with " + name;
     document.getElementById("messageModal").style.display = "flex";
@@ -144,7 +159,7 @@ function closeModal() {
     document.getElementById("messageModal").style.display = "none";
 }
 
-// BACKEND: Replace localStorage with INSERT to messages table - { sender_id, receiver_id, content, timestamp }
+// backend: Replace localStorage with INSERT to messages table - { sender_id, receiver_id, content, timestamp }
 function sendMessage() {
     const input = document.getElementById("msgInput");
     const msg = input.value.trim();
@@ -155,13 +170,13 @@ function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Clears session and redirects - BACKEND: Also call /api/logout to invalidate session token
+// Clears session and redirects - backend: Also call /api/logout to invalidate session token
 function logout() {
     localStorage.clear();
     location.href = 'index.html';
 }
 
-// Shows/hides nav buttons based on login state - BACKEND: Check session token instead of localStorage
+// Shows/hides nav buttons based on login state - backend: Check session token instead of localStorage
 document.addEventListener("DOMContentLoaded", function() {
     const loginBtn = document.getElementById("loginBtn");
     const signupBtn = document.getElementById("signupBtn");
@@ -304,7 +319,7 @@ function validateZipSearch(input) {
 }
 
 // Redirects to search page with zip as URL parameter
-// BACKEND: search.html will use zip + range to query /api/sitters/nearby?zip=XXXXX&range=X
+// backend: search.html will use zip + range to query /api/sitters/nearby?zip=XXXXX&range=X
 function searchNearby() {
     const zip = document.getElementById("zipInput").value;
     if (!zip || zip.length < 5) {

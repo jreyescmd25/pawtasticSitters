@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetSitter App</title>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,7 +41,7 @@
         <div class="sitter-grid" id="sitterGrid">
 
             <!-- DECOY CARDS - delete when database is connected -->
-            <!-- BACKEND: Call loadFeaturedSitters() on page load to replace these with real data from /api/sitters -->
+            <!-- backend: Call loadFeaturedSitters() on page load to replace these with real data from /api/sitters -->
 
             <div class="sitter-card">
                 <div class="sitter-avatar">🐶</div>
@@ -82,7 +84,7 @@
         </div>
     </section>
 
-    <!-- BACKEND: Messages stored in localStorage for now - replace with Supabase realtime messages table -->
+    <!-- backend: Messages stored in localStorage for now - replace with Supabase realtime messages table -->
     <div id="messageModal" style="display:none;">
         <div class="modal-box">
             <div class="modal-header">
