@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,49 +20,58 @@
 
     <section class="featured-sitters">
         <h2 class="section-title">My Bookings</h2>
-        <!-- BACKEND: Replace localStorage appointments with GET /api/bookings?user_id=X -->
-        <!-- Owners see their outgoing bookings, sitters see incoming requests -->
         <div id="bookingsList" class="sitter-grid"></div>
         <p id="noBookings" class="switch-page" style="color:white; display:none; font-size:18px;">No bookings yet! Search for a sitter to get started.</p>
     </section>
 
     <script src="script.js"></script>
     <script>
-        if (!localStorage.getItem("loggedIn")) {
-            location.href = "login.html";
-        }
+        if (!localStorage.getItem("loggedIn")) location.href = "login.html";
 
-        // BACKEND: Replace with GET /api/bookings?user_id=X
-        const appointments = JSON.parse(localStorage.getItem("appointments") || "[]");
-        const list = document.getElementById("bookingsList");
         const role = localStorage.getItem("userRole");
+        const list = document.getElementById("bookingsList");
 
-        if (appointments.length === 0) {
-            document.getElementById("noBookings").style.display = "block";
-        } else {
-            appointments.forEach((b, i) => {
-                const statusColor = b.status === "Accepted" ? "rgba(0,255,100,0.2)" : 
-                                    b.status === "Declined" ? "rgba(255,0,0,0.2)" : 
-                                    "rgba(255,200,0,0.2)";
-                const statusTextColor = b.status === "Accepted" ? "lightgreen" : 
+        async function loadBookings() {
+            const db = window.supabase.createClient(
+                "https://nkerqwvpxcalmcrycddz.supabase.co",
+                "sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo"
+            );
+
+            let query;
+            if (role === "sitter") {
+                const fullName = localStorage.getItem("userFirstName") + " " + localStorage.getItem("userLastName");
+                query = await db.from("bookings").select("*").eq("sitter_name", fullName);
+            } else {
+                query = await db.from("bookings").select("*").eq("owner_email", localStorage.getItem("userEmail"));
+            }
+
+            const { data, error } = query;
+
+            if (error || !data || data.length === 0) {
+                document.getElementById("noBookings").style.display = "block";
+                return;
+            }
+
+            data.forEach((b) => {
+                const statusColor = b.status === "Accepted" ? "rgba(0,255,100,0.2)" :
+                                    b.status === "Declined" ? "rgba(255,0,0,0.2)" : "rgba(255,200,0,0.2)";
+                const statusTextColor = b.status === "Accepted" ? "lightgreen" :
                                         b.status === "Declined" ? "salmon" : "gold";
 
-                // Sitters see Accept/Decline, owners see Cancel
-                // BACKEND: Accept/Decline sends PATCH /api/bookings/:id { status: "Accepted"/"Declined" }
                 const actionButtons = role === "sitter" ? `
                     ${b.status === "Pending" ? `
-                        <button onclick="acceptBooking(${i})" style="background:rgba(0,255,100,0.3); font-size:14px; padding:8px 15px;">Accept</button>
-                        <button onclick="declineBooking(${i})" style="background:rgba(255,0,0,0.3); font-size:14px; padding:8px 15px;">Decline</button>
+                        <button onclick="acceptBooking('${b.id}')" style="background:rgba(0,255,100,0.3); font-size:14px; padding:8px 15px;">Accept</button>
+                        <button onclick="declineBooking('${b.id}')" style="background:rgba(255,0,0,0.3); font-size:14px; padding:8px 15px;">Decline</button>
                     ` : ''}
-                    <button onclick="openModal('${b.sitter}')" style="font-size:14px; padding:8px 15px;">Message</button>
+                    <button onclick="openModal('${b.sitter_name}')" style="font-size:14px; padding:8px 15px;">Message</button>
                 ` : `
-                    <button onclick="cancelBooking(${i})" style="background:rgba(255,0,0,0.3); font-size:14px; padding:8px 15px;">Cancel</button>
-                    <button onclick="openModal('${b.sitter}')" style="font-size:14px; padding:8px 15px;">Message</button>
+                    <button onclick="cancelBooking('${b.id}')" style="background:rgba(255,0,0,0.3); font-size:14px; padding:8px 15px;">Cancel</button>
+                    <button onclick="openModal('${b.sitter_name}')" style="font-size:14px; padding:8px 15px;">Message</button>
                 `;
 
                 list.innerHTML += `
                     <div class="sitter-card">
-                        <h3>${b.sitter}</h3>
+                        <h3>${b.sitter_name}</h3>
                         <p class="sitter-location">Appointment: ${b.date} at ${b.time}</p>
                         <p class="sitter-location">Duration: ${b.duration} hr(s)</p>
                         <p class="sitter-location">Pet: ${b.pet}</p>
@@ -73,75 +83,52 @@
             });
         }
 
-        // BACKEND: Replace with PATCH /api/bookings/:id { status: "Accepted" }
-        function acceptBooking(index) {
-            const bookings = JSON.parse(localStorage.getItem("appointments") || "[]");
-            bookings[index].status = "Accepted";
-            localStorage.setItem("appointments", JSON.stringify(bookings));
+        async function acceptBooking(id) {
+            const db = window.supabase.createClient("https://nkerqwvpxcalmcrycddz.supabase.co","sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo");
+            await db.from("bookings").update({ status: "Accepted" }).eq("id", id);
             location.reload();
         }
 
-        // BACKEND: Replace with PATCH /api/bookings/:id { status: "Declined" }
-        function declineBooking(index) {
-            const bookings = JSON.parse(localStorage.getItem("appointments") || "[]");
-            bookings[index].status = "Declined";
-            localStorage.setItem("appointments", JSON.stringify(bookings));
+        async function declineBooking(id) {
+            const db = window.supabase.createClient("https://nkerqwvpxcalmcrycddz.supabase.co","sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo");
+            await db.from("bookings").update({ status: "Declined" }).eq("id", id);
             location.reload();
         }
 
-        function cancelBooking(index) {
-            localStorage.setItem("cancelIndex", index);
-            document.getElementById("cancelPrompt").style.display = "flex";
-        }
-
-        // BACKEND: Replace with DELETE /api/bookings/:id
-        function confirmCancel() {
-            const index = parseInt(localStorage.getItem("cancelIndex"));
-            const bookings = JSON.parse(localStorage.getItem("appointments") || "[]");
-            bookings.splice(index, 1);
-            localStorage.setItem("appointments", JSON.stringify(bookings));
+        async function cancelBooking(id) {
+            const db = window.supabase.createClient("https://nkerqwvpxcalmcrycddz.supabase.co","sb_publishable_w8R2SnJ_556KppVmF4ULCQ_H3KI1MVo");
+            await db.from("bookings").delete().eq("id", id);
             location.reload();
         }
 
-        // BACKEND: Messages stored in localStorage - replace with Supabase realtime messages table
         function openModal(name) {
             document.getElementById("modalSitterName").textContent = "Chat with " + name;
             document.getElementById("messageModal").style.display = "flex";
-            
             const chatBox = document.getElementById("chatBox");
             chatBox.innerHTML = '';
             const messages = JSON.parse(localStorage.getItem("chat_" + name) || "[]");
-            messages.forEach(m => {
-                chatBox.innerHTML += `<div class="msg ${m.type}">${m.text}</div>`;
-            });
+            messages.forEach(m => { chatBox.innerHTML += `<div class="msg ${m.type}">${m.text}</div>`; });
             chatBox.scrollTop = chatBox.scrollHeight;
-
-            const input = document.getElementById("msgInput");
-            input.onkeydown = function(event) {
-                if (event.key === "Enter") sendMessage();
-            };
+            document.getElementById("msgInput").onkeydown = function(e) { if (e.key === "Enter") sendMessage(); };
         }
 
-        function closeModal() {
-            document.getElementById("messageModal").style.display = "none";
-        }
+        function closeModal() { document.getElementById("messageModal").style.display = "none"; }
 
-        // BACKEND: Replace localStorage with INSERT to messages table { sender_id, receiver_id, content, timestamp }
         function sendMessage() {
             const input = document.getElementById("msgInput");
             const msg = input.value.trim();
             const name = document.getElementById("modalSitterName").textContent.replace("Chat with ", "");
             if (!msg) return;
-            
             const chatBox = document.getElementById("chatBox");
             chatBox.innerHTML += `<div class="msg sent">${msg}</div>`;
             input.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
-
             const messages = JSON.parse(localStorage.getItem("chat_" + name) || "[]");
             messages.push({ type: "sent", text: msg });
             localStorage.setItem("chat_" + name, JSON.stringify(messages));
         }
+
+        loadBookings();
     </script>
 
     <!-- Cancel confirmation modal -->

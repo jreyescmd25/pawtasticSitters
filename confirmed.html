@@ -16,7 +16,6 @@
     <section class="form-section">
         <div class="form-box" style="width:500px; gap:20px; text-align:center;">
             <h2>Request Sent!</h2>
-            <!-- Populated by inline script from last booking in localStorage -->
             <p class="switch-page" style="color:white; font-size:16px;" id="successMsg"></p>
             <p class="switch-page" style="color:rgba(255,255,255,0.5);" id="successDetails"></p>
             <button onclick="location.href='bookings.html'">View My Bookings</button>
@@ -26,7 +25,6 @@
 
     <script src="script.js"></script>
     <script>
-        // BACKEND: Replace localStorage read with GET /api/bookings/latest
         const last = JSON.parse(localStorage.getItem("appointments") || "[]").slice(-1)[0];
         if (last) {
             document.getElementById("successMsg").textContent = `Your booking request with ${last.sitter} has been sent. Please wait for their approval.`;
