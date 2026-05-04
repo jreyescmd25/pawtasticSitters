@@ -28,14 +28,17 @@ async function handleLogin() {
         return;
     }
 
-    // Check owners table first
-    const { data: owner } = await getDB()
-        .from("owners")
-        .select("*")
-        .eq("email", email)
-        .eq("password", password)
-        .single();
+    const db = getDB();
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
 
+    if (error) {
+        document.getElementById("loginError").style.display = "flex";
+        return;
+    }
+
+    const userId = data.user.id;
+
+    const { data: owner } = await db.from("owners").select("*").eq("user_id", userId).single();
     if (owner) {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("userEmail", owner.email);
@@ -46,14 +49,7 @@ async function handleLogin() {
         return;
     }
 
-    // Check sitters table
-    const { data: sitter } = await getDB()
-        .from("sitters")
-        .select("*")
-        .eq("email", email)
-        .eq("password", password)
-        .single();
-
+    const { data: sitter } = await db.from("sitters").select("*").eq("user_id", userId).single();
     if (sitter) {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("userEmail", sitter.email);
@@ -117,91 +113,48 @@ async function handleSignup() {
         alert("Please fill in all fields!");
         return;
     }
-    if (password !== confirm) {
-        alert("Passwords don't match!");
-        return;
-    }
-    if (selectedRole === '') {
-        alert("Please select a role!");
-        return;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-        alert("Please enter a valid email address!");
-        return;
-    }
+    if (password !== confirm) { alert("Passwords don't match!"); return; }
+    if (selectedRole === '') { alert("Please select a role!"); return; }
+    if (!email.includes('@') || !email.includes('.')) { alert("Please enter a valid email address!"); return; }
     const strongPassword = /^(?=.*[!@#$%^&*])(?=.{8,})/;
-    if (!strongPassword.test(password)) {
-        alert("Password must be at least 8 characters and include a symbol (!, @, #, etc.)");
-        return;
-    }
+    if (!strongPassword.test(password)) { alert("Password must be at least 8 characters and include a symbol (!, @, #, etc.)"); return; }
     const username = document.getElementById("signupUsername").value;
-    if (!username || username.length < 3) {
-        alert("Please enter a valid username!");
-        return;
-    }
-    // Check if username already exists in both tables
-    const { data: existingOwner } = await getDB()
-        .from("owners")
-        .select("email")
-        .eq("email", email)
-        .single();
-
-    const { data: existingSitter } = await getDB()
-        .from("sitters")
-        .select("email")
-        .eq("email", email)
-        .single();
-
-    if (existingOwner || existingSitter) {
-        alert("An account with this email already exists!");
-        return;
-    }   
+    if (!username || username.length < 3) { alert("Please enter a valid username!"); return; }
 
     const fullName = firstName + " " + lastName;
+    const db = getDB();
+
+    // Supabase Auth signup
+    const { data, error } = await db.auth.signUp({ email, password });
+    if (error) { alert(error.message); return; }
+
+    const userId = data.user.id;
 
     if (selectedRole === 'sitter') {
         const loc = document.getElementById("sitterLocation").value;
         const rate = document.getElementById("hourlyRate").value;
-        if (!loc || !rate || selectedTags.length === 0) {
-            alert("Please fill in all sitter details!");
-            return;
-        }
+        if (!loc || !rate || selectedTags.length === 0) { alert("Please fill in all sitter details!"); return; }
 
-        // Insert into Supabase sitters table
-        const { error } = await getDB()
-            .from("sitters")
-            .insert([{
-                full_name: fullName,
-                email: email,
-                // password: password,
-                location: loc,
-                specialties: selectedTags,
-                hourly_rate: parseFloat(rate)
-            }]);
-
-        if (error) {
-            alert("Signup error: " + error.message);
-            return;
-        }
+        const { error: sitterError } = await db.from("sitters").insert({
+            user_id: userId,
+            full_name: fullName,
+            email: email,
+            location: loc,
+            specialties: selectedTags,
+            hourly_rate: parseFloat(rate)
+        });
+        if (sitterError) { alert("Signup error: " + sitterError.message); return; }
 
         localStorage.setItem("userLocation", loc);
         localStorage.setItem("userRate", rate);
         localStorage.setItem("userTags", selectedTags.join(", "));
-
     } else {
-        // Insert into Supabase owners table
-        const { error } = await getDB()
-            .from("owners")
-            .insert([{
-                full_name: fullName,
-                email: email,
-                // password: password
-            }]);
-
-        if (error) {
-            alert("Signup error: " + error.message);
-            return;
-        }
+        const { error: ownerError } = await db.from("owners").insert({
+            user_id: userId,
+            full_name: fullName,
+            email: email
+        });
+        if (ownerError) { alert("Signup error: " + ownerError.message); return; }
     }
 
     localStorage.setItem("loggedIn", "true");
@@ -212,7 +165,7 @@ async function handleSignup() {
     localStorage.setItem("userAvatar", selectedAvatar);
     localStorage.setItem("userUsername", username);
     location.href = "profile.html";
-}
+} 
 // Fetches real sitters from Supabase database and renders them as cards
 // Removes decoy cards and replaces with live data
 // BACKEND: Connected to sitters table in Supabase - set up by Antoine

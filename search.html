@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Sitters</title>
-    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -48,7 +46,6 @@
         </div>
     </section>
 
-    <script src="script.js"></script>
     <script>
         // Gets zip from URL parameter passed by searchNearby() in script.js
         const params = new URLSearchParams(window.location.search);
@@ -94,12 +91,15 @@
             }
         }
         async function loadSearchSitters() {
-            const grid = document.getElementById("searchResults");
-            if (!grid) return;
+        const grid = document.getElementById("searchResults");
+        if (!grid) return;
 
+        try {
             const { data: sitters, error } = await getDB().from("sitters").select("*");
-            if (error) { console.log(error.message); return; }
-
+            if (error || !sitters || sitters.length === 0) {
+                showDecoys();
+                return;
+            }
             grid.innerHTML = '';
             sitters.forEach(sitter => {
                 grid.innerHTML += `
@@ -115,7 +115,42 @@
                     </div>
                 `;
             });
+        } catch(e) {
+            showDecoys();
         }
+    }
+
+    function showDecoys() {
+        const grid = document.getElementById("searchResults");
+        grid.innerHTML = `
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐶</div>
+                <h3>Jamie Starr</h3>
+                <p class="sitter-location">Bronx, NY · 2.3 mi</p>
+                <div class="sitter-tags"><span class="tag">Dog</span><span class="tag">Cat</span></div>
+                <p class="sitter-rate">$15/hr</p>
+                <button onclick="handleSitterClick('Jamie Starr')">Book</button>
+            </div>
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐈</div>
+                <h3>Carlos Santana</h3>
+                <p class="sitter-location">Brooklyn, NY · 4.1 mi</p>
+                <div class="sitter-tags"><span class="tag">Cat</span><span class="tag">Bird</span></div>
+                <p class="sitter-rate">$12/hr</p>
+                <button onclick="handleSitterClick('Carlos Santana')">Book</button>
+            </div>
+            <div class="sitter-card">
+                <div class="sitter-avatar">🐾</div>
+                <h3>Shelly Lily</h3>
+                <p class="sitter-location">Queens, NY · 6.7 mi</p>
+                <div class="sitter-tags"><span class="tag">Dog</span><span class="tag">Other</span></div>
+                <p class="sitter-rate">$18/hr</p>
+                <button onclick="handleSitterClick('Shelly Lily')">Book</button>
+            </div>
+        `;
+    }
+
+window.addEventListener("load", loadSearchSitters);
 
         window.addEventListener("load", loadSearchSitters);
 
@@ -131,5 +166,8 @@
             <button onclick="document.getElementById('loginPrompt').style.display='none'" style="background:none; font-size:14px; padding:5px;">Cancel</button>
         </div>
     </div>
+    <!-- Supabase CDN - connects to cloud database provided by Antoine -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
